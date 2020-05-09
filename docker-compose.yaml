@@ -1,0 +1,61 @@
+version: '3.7'
+services:
+  aws:
+    image: organs/awscli
+    environment:
+      AWS_ACCESS_KEY_ID: AKIA2775Z6VWDAT46QO5
+      AWS_SECRET_ACCESS_KEY: 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
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - "$PWD:/app"
+    working_dir: /app      
+  terraform:
+    build:
+      context: .
+      dockerfile: terraform.dockerfile 
+    environment:
+      AWS_ACCESS_KEY_ID: AKIA2775Z6VWDAT46QO5
+      AWS_SECRET_ACCESS_KEY: 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
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - "$PWD:/app"
+    working_dir: /app      
+  website:
+    build:
+      context: .
+    ports:
+      - 80:80
+  unit-tests: 
+    environment:
+      SELENIUM_HOST: selenium
+      SELENIUM_PORT: 4444
+    volumes: 
+      - "$PWD:/app"
+    build:
+      context: .
+      dockerfile: rspec.dockerfile
+    command:
+      - --pattern
+      - /app/spec/unit/*_spec.rb
+  integration-tests: 
+    environment:
+      SELENIUM_HOST: selenium
+      SELENIUM_PORT: 4444
+    volumes: 
+      - "$PWD:/app"
+    build:
+      context: .
+      dockerfile: rspec.dockerfile
+    command:
+      - --pattern
+      - /app/spec/integration/*_spec.rb
+  selenium:
+    image: selenium/standalone-chrome-debug
+    ports:
+      - 4444:4444
+      - 5901:5900
+
+
+
